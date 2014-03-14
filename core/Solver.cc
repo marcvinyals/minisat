@@ -45,6 +45,7 @@ static DoubleOption  opt_garbage_frac      (_cat, "gc-frac",     "The fraction o
 
 
 static BoolOption    opt_restarts          ("HACK", "restarts",  "Do restarts", true);
+static IntOption     opt_print_learnt_clauses("HACK", "print-learnt-clauses", "Print learnt clauses of arity at most this", -1, IntRange(-1, INT32_MAX));
 
 //=================================================================================================
 // Constructor/Destructor:
@@ -631,6 +632,12 @@ lbool Solver::search(int nof_conflicts)
             learnt_clause.clear();
             analyze(confl, learnt_clause, backtrack_level);
             cancelUntil(backtrack_level);
+            
+            if (learnt_clause.size()<=opt_print_learnt_clauses) {
+				printf("Learnt:");
+				for (int i=0;i<learnt_clause.size();++i) printf(" %c%d",sign(learnt_clause[i])?'~':' ',var(learnt_clause[i]));
+				printf("\n");
+			}
 
             if (learnt_clause.size() == 1){
                 uncheckedEnqueue(learnt_clause[0]);
