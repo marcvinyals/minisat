@@ -44,6 +44,8 @@ static DoubleOption  opt_restart_inc       (_cat, "rinc",        "Restart interv
 static DoubleOption  opt_garbage_frac      (_cat, "gc-frac",     "The fraction of wasted memory allowed before a garbage collection is triggered",  0.20, DoubleRange(0, false, HUGE_VAL, false));
 
 
+static BoolOption    opt_restarts          ("HACK", "restarts",  "Do restarts", true);
+
 //=================================================================================================
 // Constructor/Destructor:
 
@@ -770,12 +772,17 @@ lbool Solver::solve_()
 
     // Search:
     int curr_restarts = 0;
-    while (status == l_Undef){
-        double rest_base = luby_restart ? luby(restart_inc, curr_restarts) : pow(restart_inc, curr_restarts);
-        status = search(rest_base * restart_first);
-        if (!withinBudget()) break;
-        curr_restarts++;
+	if(opt_restarts) {
+		while (status == l_Undef){
+			double rest_base = luby_restart ? luby(restart_inc, curr_restarts) : pow(restart_inc, curr_restarts);
+			status = search(rest_base * restart_first);
+			if (!withinBudget()) break;
+			curr_restarts++;
+		}
     }
+    else {
+        status = search(-1);
+	}
 
     if (verbosity >= 1)
         printf("===============================================================================\n");
