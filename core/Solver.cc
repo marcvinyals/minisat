@@ -46,6 +46,7 @@ static DoubleOption  opt_garbage_frac      (_cat, "gc-frac",     "The fraction o
 
 static BoolOption    opt_restarts          ("HACK", "restarts",  "Do restarts", true);
 static IntOption     opt_print_learnt_clauses("HACK", "print-learnt-clauses", "Print learnt clauses of arity at most this", -1, IntRange(-1, INT32_MAX));
+static BoolOption    opt_fixed_order       ("HACK", "fixed-order", "Use a fixed variable order", false);
 
 //=================================================================================================
 // Constructor/Destructor:
@@ -90,7 +91,7 @@ Solver::Solver() :
   , qhead              (0)
   , simpDB_assigns     (-1)
   , simpDB_props       (0)
-  , order_heap         (VarOrderLt(activity))
+  , order_heap         (VarOrderLt(opt_fixed_order ? fixed_order : activity))
   , progress_estimate  (0)
   , remove_satisfied   (true)
 
@@ -123,6 +124,7 @@ Var Solver::newVar(bool sign, bool dvar)
     vardata  .push(mkVarData(CRef_Undef, 0));
     //activity .push(0);
     activity .push(rnd_init_act ? drand(random_seed) * 0.00001 : 0);
+    fixed_order.push(v);
     seen     .push(0);
     polarity .push(sign);
     decision .push();
